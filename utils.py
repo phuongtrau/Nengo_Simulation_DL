@@ -137,7 +137,7 @@ def run_network(
     # we'll only record from a subset of neurons, to save memory.
     sample_neurons = np.linspace(
         0,
-        np.prod(conv0.shape[1:]),
+        np.prod(model.layers[1].shape[1:]),
         1000,
         endpoint=False,
         dtype=np.int32,

@@ -82,7 +82,7 @@ if do_training:
         )
 
         # save the parameters to file
-        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_PRE_1")
+        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S13")
 
 run_network(model=model,test_labels=test_labels,test_images=test_images,activation=nengo.RectifiedLinear())
 
