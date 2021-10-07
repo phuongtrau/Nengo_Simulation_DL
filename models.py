@@ -83,8 +83,6 @@ if do_training:
 
         # save the parameters to file
         sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S13")
-<<<<<<< HEAD
-=======
         
 def run_network(
     activation,
