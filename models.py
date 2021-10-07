@@ -87,7 +87,7 @@ if do_training:
 def run_network(
     activation,
     model,test_images,test_labels,
-    params_file="SNN_BED_LOSO_NON_PRE_1",
+    params_file="SNN_PARAMS/SNN_BED_LOSO_NON_S13",
     n_steps=120,
     scale_firing_rates=5,
     synapse=None,
@@ -152,8 +152,8 @@ for s in [ 0.005, 0.01]:
         print(f"Synapse={s:.3f}", f"scale_firing_rates={scale:.3f}")
         run_network(
         activation=nengo.SpikingRectifiedLinear(),
+        model=model,test_labels=test_labels,test_images=test_images,
         scale_firing_rates=scale,
         n_steps=120,
         synapse=s,
         )
-    plt.show()
