@@ -108,6 +108,7 @@ def export_data(data_dir_test='experiment-i_hoang/test',
 
     return data_train, labels_train , data_test, labels_test
 
+<<<<<<< HEAD
 def run_network(
     activation,
     model,test_images,test_labels,
@@ -168,3 +169,5 @@ def run_network(
     predictions = np.argmax(data[nengo_output][:, -1], axis=-1)
     accuracy = (predictions == test_labels[:n_test, 0, 0]).mean()
     print("DO CHINH XAC:", accuracy)
+=======
+>>>>>>> 1c6b7f211b8fbe697096a4755d0f347c21da7ba7
