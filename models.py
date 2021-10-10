@@ -82,12 +82,12 @@ if do_training:
             #callbacks=[model_checkpoint_callback],
         )
         # save the parameters to file
-        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S13")
+        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S11")
         
 def run_network(
     activation,
     model,test_images,test_labels,
-    params_file="SNN_BED_LOSO_NON_PRE_1",
+    params_file="SNN_PARAMS/SNN_BED_LOSO_NON_S11",
     n_steps=120,
     scale_firing_rates=5,
     synapse=None,
@@ -152,6 +152,7 @@ for s in [ 0.005, 0.01]:
         print(f"Synapse={s:.3f}", f"scale_firing_rates={scale:.3f}")
         run_network(
         activation=nengo.SpikingRectifiedLinear(),
+        model=model,test_labels=test_labels,test_images=test_images,
         scale_firing_rates=scale,
         n_steps=120,
         synapse=s,
@@ -170,9 +171,16 @@ for s in [ 0.005, 0.01]:
           "synop_energy cpu",
           "synop_energy gpu",
           "neuron_energy cpu",
+<<<<<<< HEAD
           "neuron_energy gpu",
             ),
             print_warnings=False,
          )
 
     #plt.show()
+=======
+          "neuron_energy gpu"
+            ),
+            print_warnings=False,
+         )
+>>>>>>> 60229adec3d89f48677a4d2c1e6b97bfb938caed
