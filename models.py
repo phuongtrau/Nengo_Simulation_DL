@@ -83,12 +83,12 @@ if do_training:
         )
 
         # save the parameters to file
-        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S11")
+        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S10")
         
 def run_network(
     activation,
     model,test_images,test_labels,
-    params_file="SNN_PARAMS/SNN_BED_LOSO_NON_S11",
+    params_file="SNN_PARAMS/SNN_BED_LOSO_NON_S10",
     n_steps=120,
     scale_firing_rates=5,
     synapse=None,
