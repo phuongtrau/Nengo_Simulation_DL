@@ -54,14 +54,14 @@ with net_train:
 
 do_training = True
 
-# checkpoint_filepath = 'Nengo_weight'
+checkpoint_filepath = 'Nengo_weight'
 
-# model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#     filepath=checkpoint_filepath,
-#     save_weights_only=True,
-#     monitor='val_loss',
-#     mode='max',
-#     save_best_only=True)
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_filepath,
+    save_weights_only=True,
+    monitor='val_loss',
+    mode='max',
+    save_best_only=True)
 
 if do_training:
     with nengo_dl.Simulator(net_train, minibatch_size=64,seed=0) as sim:
@@ -81,6 +81,7 @@ if do_training:
             epochs=10,
             #callbacks=[model_checkpoint_callback],
         )
+
         # save the parameters to file
         sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S11")
         
@@ -171,16 +172,7 @@ for s in [ 0.005, 0.01]:
           "synop_energy cpu",
           "synop_energy gpu",
           "neuron_energy cpu",
-<<<<<<< HEAD
-          "neuron_energy gpu",
-            ),
-            print_warnings=False,
-         )
-
-    #plt.show()
-=======
           "neuron_energy gpu"
             ),
             print_warnings=False,
          )
->>>>>>> 60229adec3d89f48677a4d2c1e6b97bfb938caed
