@@ -15,6 +15,7 @@ import tensorflow as tf
 import nengo_dl
 import cv2
 from utils import *
+import keras_spiking
 # sub_test = ['S8']
 # ls_sub = ['S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13']
 # ls_sub.remove(sub_test)
@@ -53,14 +54,14 @@ with net_train:
 
 do_training = True
 
-checkpoint_filepath = 'Nengo_weight'
+# checkpoint_filepath = 'Nengo_weight'
 
-model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    filepath=checkpoint_filepath,
-    save_weights_only=True,
-    monitor='val_loss',
-    mode='max',
-    save_best_only=True)
+# model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+#     filepath=checkpoint_filepath,
+#     save_weights_only=True,
+#     monitor='val_loss',
+#     mode='max',
+#     save_best_only=True)
 
 if do_training:
     with nengo_dl.Simulator(net_train, minibatch_size=64,seed=0) as sim:
@@ -80,7 +81,6 @@ if do_training:
             epochs=10,
             #callbacks=[model_checkpoint_callback],
         )
-
         # save the parameters to file
         sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S13")
         
@@ -156,4 +156,23 @@ for s in [ 0.005, 0.01]:
         n_steps=120,
         synapse=s,
         )
-    plt.show()
+        print('\n')
+        print('THE ENERGY OF SNN WITH SCALE ', scale)
+        energy = keras_spiking.ModelEnergy(model, example_data=np.ones((32, 64, 32,1))*scale)
+        energy.summary(
+            columns=(
+          "name",
+          "synop_energy loihi",
+          "neuron_energy loihi",
+          'energy loihi ',
+          "energy cpu",
+          "energy gpu",
+          "synop_energy cpu",
+          "synop_energy gpu",
+          "neuron_energy cpu",
+          "neuron_energy gpu",
+            ),
+            print_warnings=False,
+         )
+
+    #plt.show()
