@@ -18,12 +18,12 @@ from utils import *
 import keras_spiking
 
 # train_images, train_labels, test_images, test_labels = export_data()
-exp_i_data = export_data_exp_i("experiment-i")
+exp_i_data = export_data_exp_i("experiment-i",preprocess=True)
 datasets = {"Base":exp_i_data}
 subjects = ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S12","S13"]
 
 acc_per_so = []
-loss_per_so = []
+# loss_per_so = []
 ls_train_full = subjects.copy()
 for sub in ls_train_full:
     subjects.remove(sub)
@@ -31,7 +31,11 @@ for sub in ls_train_full:
     train_data = Mat_Dataset(datasets,["Base"],subjects)
     #### Load data test ####
     test_data = Mat_Dataset(datasets,["Base"],[sub])
-    
+    # print("train_images_shape",train_data.samples.shape)
+    # print("test_images_shape",test_data.samples.shape)
+    # print("train_labels_shape",train_data.labels.shape)
+    # print("test_labels_shape",test_data.labels.shape)
+
     inp=tf.keras.layers.Input(shape=(64,32,1))
 
     conv0 = tf.keras.layers.Conv2D(filters=64,kernel_size=3,padding="same", activation=tf.nn.relu)(inp)
@@ -58,7 +62,7 @@ for sub in ls_train_full:
             # Disable the NengoDL graph optimizer
         nengo_dl.configure_settings(planner=nengo_dl.graph_optimizer.noop_planner)
 
-    do_training = True
+    do_training = False
 
     # checkpoint_filepath = 'Nengo_weight'
 
@@ -77,6 +81,8 @@ for sub in ls_train_full:
                 loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
                 metrics=[tf.metrics.sparse_categorical_accuracy],
             )
+            print('------------------------------------------------------------------------')
+            print(f'Training for subject {sub} ...')
             sim.fit(
                 {converter.inputs[inp]: train_data.samples},
                 {converter.outputs[dense]: train_data.labels},
@@ -88,12 +94,18 @@ for sub in ls_train_full:
                 #callbacks=[model_checkpoint_callback],
             )
             # save the parameters to file
-            path_params = "SNN_PARAMS/SNN_BED_LOSO_NON_{}".format(sub)
+            path_params = "SNN_PARAMS/SNN_BED_LOSO_{}".format(sub)
             sim.save_params(path_params)
-        
+    else:
+        print('------------------------------------------------------------------------')
+        print(f'Training for subject {sub} ...')
+        path_params = "SNN_PARAMS/SNN_BED_LOSO_{}".format(sub)
+
     def run_network(
         activation,
-        model,test_images,test_labels,
+        model,
+        test_images,
+        test_labels,
         params_file=path_params,
         n_steps=120,
         scale_firing_rates=5,
@@ -142,7 +154,7 @@ for sub in ls_train_full:
             nengo_converter.net, minibatch_size=10, progress_bar=False
         ) as nengo_sim:
             params = list(nengo_sim.keras_model.weights)
-            print(len(params))
+            # print(len(params))
             nengo_sim.load_params(params_file)
             data = nengo_sim.predict({nengo_input: tiled_test_images})
 
@@ -151,35 +163,77 @@ for sub in ls_train_full:
         predictions = np.argmax(data[nengo_output][:, -1], axis=-1)
         accuracy = (predictions == test_labels[:n_test, 0, 0]).mean()
         print("DO CHINH XAC:", accuracy)
+        acc_per_so.append(accuracy*100)
+        for ii in range(3):
+            plt.figure(figsize=(24, 8))
 
-    run_network(model=model,test_labels=test_data.labels,\
-            test_images=test_data.samples,activation=nengo.RectifiedLinear())
+            plt.subplot(1, 3, 1)
+            plt.title("Input image")
+            plt.imshow(test_images[ii, 0].reshape((64, 32)), cmap="gray")
+            plt.axis("off")
 
-    for s in [ 0.005, 0.01]:
-        for scale in [1, 2, 5, 10, 20, 30, 40, 50, 100]:
+            plt.subplot(1, 3, 2)
+            scaled_data = data[conv0_probe][ii] * scale_firing_rates
+            if isinstance(activation, nengo.SpikingRectifiedLinear):
+                scaled_data *= 0.001
+                rates = np.sum(scaled_data, axis=0) / (n_steps * nengo_sim.dt)
+                plt.ylabel("Number of spikes")
+            else:
+                rates = scaled_data
+                plt.ylabel("Firing rates (Hz)")
+            plt.xlabel("Timestep")
+            plt.title(
+                f"Neural activities (conv0 mean={rates.mean():.1f} Hz, "
+                f"max={rates.max():.1f} Hz)"
+            )
+            plt.plot(scaled_data)
+
+            plt.subplot(1, 3, 3)
+            plt.title("Output predictions")
+            plt.plot(tf.nn.softmax(data[nengo_output][ii]))
+            plt.legend(["Posture " + str(j) for j in range(17)], loc="upper left")
+            plt.xlabel("Timestep")
+            plt.ylabel("Probability")
+
+            plt.tight_layout()
+
+            plt.savefig("out.jpg")
+
+
+    # run_network(model=model,test_labels=test_data.labels,\
+    #         test_images=test_data.samples,activation=nengo.RectifiedLinear())
+
+    for s in [ 0.01]:
+        for scale in [50]:
             print(f"Synapse={s:.3f}", f"scale_firing_rates={scale:.3f}")
             run_network(
             activation=nengo.SpikingRectifiedLinear(),
-            model=model,test_labels=test_labels,test_images=test_images,
+            model=model,
+            test_labels=test_data.labels,
+            test_images=test_data.samples,
             scale_firing_rates=scale,
             n_steps=120,
             synapse=s,
             )
-            print('\n')
-            print('THE ENERGY OF SNN WITH SCALE ', scale)
-            energy = keras_spiking.ModelEnergy(model, example_data=np.ones((32, 64, 32,1))*scale)
-            energy.summary(
-                columns=(
-            "name",
-            "synop_energy loihi",
-            "neuron_energy loihi",
-            "energy loihi",
-            "energy cpu",
-            "energy gpu",
-            "synop_energy cpu",
-            "synop_energy gpu",
-            "neuron_energy cpu",
-            "neuron_energy gpu"
-                ),
-                print_warnings=False,
-            )
+            # print('\n')
+            # print('THE ENERGY OF SNN WITH SCALE ', scale)
+            # energy = keras_spiking.ModelEnergy(model, example_data=np.ones((32, 64, 32,1))*scale)
+            # energy.summary(
+            #    columns=(
+            # "name",
+            # "energy loihi",
+            # "energy cpu",
+            # "energy gpu",
+            #     ),
+            #    print_warnings=False,
+            # )
+    subjects = ls_train_full.copy()
+print('------------------------------------------------------------------------')
+print('Score per subject out')
+for i in range(0, len(acc_per_so)):
+  print('------------------------------------------------------------------------')
+  print(f'> Subject {i+1} - Accuracy: {acc_per_so[i]}%')
+print('------------------------------------------------------------------------')
+print('Average scores for all subject out:')
+print(f'> Accuracy: {np.mean(acc_per_so)} (+- {np.std(acc_per_so)})')
+print('------------------------------------------------------------------------')
