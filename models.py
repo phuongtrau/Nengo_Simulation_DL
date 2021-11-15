@@ -23,7 +23,10 @@ import keras_spiking
 # source = 'experiment-i_hoang'
 
 train_images, train_labels, test_images, test_labels = export_data()
-
+print("train_images_shape",train_images.shape)
+print("test_images_shape",test_images.shape)
+print("train_labels_shape",train_labels.shape)
+print("test_labels_shape",test_labels.shape)
 
 
 inp=tf.keras.layers.Input(shape=(64,32,1))
@@ -52,7 +55,7 @@ with net_train:
         # Disable the NengoDL graph optimizer
     nengo_dl.configure_settings(planner=nengo_dl.graph_optimizer.noop_planner)
 
-do_training = True
+do_training = False
 
 checkpoint_filepath = 'Nengo_weight'
 
@@ -83,12 +86,12 @@ if do_training:
         )
 
         # save the parameters to file
-        sim.save_params("SNN_PARAMS/SNN_BED_LOSO_NON_S10")
+        sim.save_params("SNN_PARAMS_Hoang/SNN_BED_LOSO_NON_S13")
         
 def run_network(
     activation,
     model,test_images,test_labels,
-    params_file="SNN_PARAMS/SNN_BED_LOSO_NON_S10",
+    params_file="SNN_PARAMS_Hoang/SNN_BED_LOSO_NON_S12",
     n_steps=120,
     scale_firing_rates=5,
     synapse=None,
@@ -136,7 +139,7 @@ def run_network(
         nengo_converter.net, minibatch_size=10, progress_bar=False
     ) as nengo_sim:
         params = list(nengo_sim.keras_model.weights)
-        print(len(params))
+        # print(len(params))
         nengo_sim.load_params(params_file)
         data = nengo_sim.predict({nengo_input: tiled_test_images})
 
@@ -146,10 +149,10 @@ def run_network(
     accuracy = (predictions == test_labels[:n_test, 0, 0]).mean()
     print("DO CHINH XAC:", accuracy)
 
-run_network(model=model,test_labels=test_labels,test_images=test_images,activation=nengo.RectifiedLinear())
+# run_network(model=model,test_labels=test_labels,test_images=test_images,activation=nengo.RectifiedLinear())
 
-for s in [ 0.005, 0.01]:
-    for scale in [1, 2, 5, 10, 20, 30, 40, 50, 100]:
+for s in [ 0.01]:
+    for scale in [50]:
         print(f"Synapse={s:.3f}", f"scale_firing_rates={scale:.3f}")
         run_network(
         activation=nengo.SpikingRectifiedLinear(),
@@ -164,15 +167,15 @@ for s in [ 0.005, 0.01]:
         energy.summary(
             columns=(
           "name",
-          "synop_energy loihi",
-          "neuron_energy loihi",
+        #   "synop_energy loihi",
+        #   "neuron_energy loihi",
           'energy loihi ',
           "energy cpu",
           "energy gpu",
-          "synop_energy cpu",
-          "synop_energy gpu",
-          "neuron_energy cpu",
-          "neuron_energy gpu"
+        #   "synop_energy cpu",
+        #   "synop_energy gpu",
+        #   "neuron_energy cpu",
+        #   "neuron_energy gpu"
             ),
             print_warnings=False,
          )

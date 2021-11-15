@@ -62,7 +62,7 @@ for sub in ls_train_full:
             # Disable the NengoDL graph optimizer
         nengo_dl.configure_settings(planner=nengo_dl.graph_optimizer.noop_planner)
 
-    do_training = True
+    do_training = False
 
     # checkpoint_filepath = 'Nengo_weight'
 
@@ -164,40 +164,40 @@ for sub in ls_train_full:
         accuracy = (predictions == test_labels[:n_test, 0, 0]).mean()
         print("DO CHINH XAC:", accuracy)
         acc_per_so.append(accuracy*100)
-        # for ii in range(3):
-        #     plt.figure(figsize=(24, 8))
+        for ii in range(3):
+            plt.figure(figsize=(24, 8))
 
-        #     plt.subplot(1, 3, 1)
-        #     plt.title("Input image")
-        #     plt.imshow(test_images[ii, 0].reshape((64, 32)), cmap="gray")
-        #     plt.axis("off")
+            plt.subplot(1, 3, 1)
+            plt.title("Input image")
+            plt.imshow(test_images[ii, 0].reshape((64, 32)), cmap="gray")
+            plt.axis("off")
 
-        #     plt.subplot(1, 3, 2)
-        #     scaled_data = data[conv0_probe][ii] * scale_firing_rates
-        #     if isinstance(activation, nengo.SpikingRectifiedLinear):
-        #         scaled_data *= 0.001
-        #         rates = np.sum(scaled_data, axis=0) / (n_steps * nengo_sim.dt)
-        #         plt.ylabel("Number of spikes")
-        #     else:
-        #         rates = scaled_data
-        #         plt.ylabel("Firing rates (Hz)")
-        #     plt.xlabel("Timestep")
-        #     plt.title(
-        #         f"Neural activities (conv0 mean={rates.mean():.1f} Hz, "
-        #         f"max={rates.max():.1f} Hz)"
-        #     )
-        #     plt.plot(scaled_data)
+            plt.subplot(1, 3, 2)
+            scaled_data = data[conv0_probe][ii] * scale_firing_rates
+            if isinstance(activation, nengo.SpikingRectifiedLinear):
+                scaled_data *= 0.001
+                rates = np.sum(scaled_data, axis=0) / (n_steps * nengo_sim.dt)
+                plt.ylabel("Number of spikes")
+            else:
+                rates = scaled_data
+                plt.ylabel("Firing rates (Hz)")
+            plt.xlabel("Timestep")
+            plt.title(
+                f"Neural activities (conv0 mean={rates.mean():.1f} Hz, "
+                f"max={rates.max():.1f} Hz)"
+            )
+            plt.plot(scaled_data)
 
-        #     plt.subplot(1, 3, 3)
-        #     plt.title("Output predictions")
-        #     plt.plot(tf.nn.softmax(data[nengo_output][ii]))
-        #     plt.legend(["Posture " + str(j) for j in range(17)], loc="upper left")
-        #     plt.xlabel("Timestep")
-        #     plt.ylabel("Probability")
+            plt.subplot(1, 3, 3)
+            plt.title("Output predictions")
+            plt.plot(tf.nn.softmax(data[nengo_output][ii]))
+            plt.legend(["Posture " + str(j) for j in range(17)], loc="upper left")
+            plt.xlabel("Timestep")
+            plt.ylabel("Probability")
 
-        #     plt.tight_layout()
+            plt.tight_layout()
 
-        #     plt.savefig("out.jpg")
+            plt.savefig("out.jpg")
 
 
     # run_network(model=model,test_labels=test_data.labels,\
