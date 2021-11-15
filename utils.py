@@ -176,8 +176,13 @@ def export_data_exp_i(path='experiment-i_hoang/train',preprocess=True):
                                     
                                     # Change the range from [0-1000] to [0-255].
                             file_data = np.round(raw_data*255/1000).astype(np.uint8)            
-                                        
-                            file_data = file_data.reshape(1,1, 2048)
+                            
+                            # file_data = cv2.equalizeHist(file_data)
+
+                            file_data = file_data.reshape(1,1,2048)
+
+                            
+
                                         # Turn the file index into position list,
                                         # and turn position list into reduced indices.
                             file_label= token_position_new(position_i[int(file[:-4])])
@@ -208,11 +213,11 @@ class Mat_Dataset():
 
     for mat in mats:
       data = datasets[mat]
-      self.samples.append(np.concatenate([data.get(key)[0] for key in Subject_IDs]))
-      self.labels.append(np.concatenate([data.get(key)[1] for key in Subject_IDs]))
+      self.samples.append(np.concatenate([data.get(key)[0] for key in Subject_IDs],axis=0))
+      self.labels.append(np.concatenate([data.get(key)[1] for key in Subject_IDs],axis=0))
 
-    self.samples = np.concatenate(self.samples)
-    self.labels = np.concatenate(self.labels)
+    self.samples = np.vstack(self.samples)
+    self.labels = np.hstack(self.labels)
 
   def __len__(self):
     return self.samples.shape[0]
